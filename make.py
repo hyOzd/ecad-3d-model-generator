@@ -25,7 +25,7 @@
 
 from e3dmg.exporters import export
 from e3dmg.dbutils import getGenerator, getAllAt
-import sys, argparse
+import sys, argparse, os
 
 def initParser():
     """Initializes and returns argument parser."""
@@ -67,6 +67,8 @@ Create STEP files for all components:
                         help="generate a FreeCAD file")
     parser.add_argument('--dont-fuse', action='store_true',
                         help="do not fuse model to a single part/mesh")
+    parser.add_argument('--outdir', default='./output',
+                        help="output directory of models")
     parser.add_argument('component', nargs='?',
                         help="component model to generate or 'all'")
     return parser
@@ -90,15 +92,23 @@ def makeOne(args, name, generator, package):
     """
     print("Making %s:%s..." % (package, name))
     model = generator.generate()
+
+    # create output directory if it doesn't exist
+    odir = os.path.abspath(args.outdir)
+    odir = '/'.join(odir.split('/') + package[len('e3dmg.database.'):].split('.'))
+    if not os.path.exists(odir):
+        os.makedirs(odir)
+
+    fname = odir+'/'+name
     fuse = not args.dont_fuse
     if args.step:
-        export("STEP", model, name + '.step', fuse)
+        export("STEP", model, fname+'.step', fuse)
     if args.vrml:
-        export("VRML", model, name + '.wrl', fuse)
+        export("VRML", model, fname+'.wrl', fuse)
     if args.x3d:
-        export("X3D", model, name + '.x3d', fuse)
+        export("X3D", model, fname+'.x3d', fuse)
     if args.freecad:
-        export("FREECAD", model, name + '.fcstd', fuse)
+        export("FREECAD", model, fname+'.fcstd', fuse)
     print("Done %s:%s..." % (package, name))
 
 def make(args):
