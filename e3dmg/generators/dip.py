@@ -21,6 +21,7 @@
 import cadquery as cq
 from e3dmg import ComponentModel, Generator
 from math import tan, radians, sqrt
+from e3dmg.utils import mm
 
 class DIPGen(Generator):
 
@@ -183,3 +184,35 @@ class DIPGen(Generator):
         model.addPart(case, self.case_color, "body")
         model.addPart(pins, self.pins_color, "pins")
         return model
+
+class DIP300Gen(DIPGen):
+    """A sub-generator for 300mil wide DIP packages"""
+    def __init__(self, D, npins):
+        DIPGen.__init__(
+            self,
+            D = D,         # package length
+            E1 = 6.35,     # package width
+            E = 7.874,     # shoulder to shoulder width (includes pins)
+            A1 = 0.38,     # base to seating plane
+            A2 = 3.3,      # package height
+            b1 = 1.524,    # upper lead width
+            b = 0.457,     # lower lead width
+            e = 2.54,      # pin to pin distance
+            npins = npins  # total number of pins
+        )
+
+class DIP600Gen(DIPGen):
+    """A sub-generator for 600mil wide DIP packages"""
+    def __init__(self, D, npins):
+        DIPGen.__init__(
+            self,
+            D = D,          # package length
+            E1 = mm(0.53),  # package width
+            E = mm(0.61),   # shoulder to shoulder width (includes pins)
+            A1 = 0.38,      # base to seating plane
+            A2 = 3.3,       # package height
+            b1 = 1.524,     # upper lead width
+            b = 0.457,      # lower lead width
+            e = 2.54,       # pin to pin distance
+            npins = npins   # total number of pins
+        )

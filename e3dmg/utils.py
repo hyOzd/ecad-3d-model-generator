@@ -18,15 +18,6 @@
 # along with ecad-3d-model-generator.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-from e3dmg.generators.dip import DIPGen, DIP300Gen, DIP600Gen
-from e3dmg.utils import mm
-
-DIP08 = DIP300Gen(
-    D = 9.27,   # package length
-    npins = 8  # total number of pins
-)
-
-DIP22_6 = DIP600Gen(
-    D = mm(1.1),
-    npins = 22
-)
+def mm(inch):
+    """Convenience function to convert inches to mm"""
+    return inch*25.4
