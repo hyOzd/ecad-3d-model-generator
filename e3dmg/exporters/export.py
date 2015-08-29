@@ -55,13 +55,14 @@ def exportx3d(objects, filename):
 
     exportX3D(meshes, filename)
 
-def export(ftype, componentModel, filename, fuse=False):
+def export(ftype, componentModel, filename, fuse=False, scale=None):
     """ Exports given ComponentModel object using FreeCAD.
 
     `ftype` : one of "STEP", "VRML", "FREECAD", "X3D"
     `componentModel` : a ComponentModel instance
     `filename` : name of the file, extension is important
     `fuse` : fuse objects together before export (preserves color)
+    `scale` : scales the model with this factor before exporting
 
     X3D exporter doesn't support `fuse` parameter.
     """
@@ -78,6 +79,7 @@ def export(ftype, componentModel, filename, fuse=False):
     # export to X3D, continue for other exporters (VRML, FREECAD, STEP)
     if ftype == "X3D":
         if fuse: print("X3D exporter can't do fuse, ignoring.")
+        if scale: print("X3D exporter can't do scale, ignoring.")
         exportx3d(objects, filename)
         return
 
@@ -107,6 +109,13 @@ def export(ftype, componentModel, filename, fuse=False):
         exportObjects = [fuseobj]
     else:
         exportObjects = fcobjects
+
+    if scale:
+        import Draft
+        v = FreeCAD.Vector(scale, scale, scale)
+        vc = FreeCAD.Vector(0,0,0)
+        # legacy=False, sometimes fail if scale < 1.0
+        exportObjects = [Draft.scale(obj, delta=v, center=vc, legacy=True) for obj in exportObjects]
 
     doc.recompute()
 
