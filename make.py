@@ -69,6 +69,8 @@ Create STEP files for all components:
                         help="do not fuse model to a single part/mesh")
     parser.add_argument('--outdir', default='./output',
                         help="output directory of models")
+    parser.add_argument('--scale', default=None, type=float,
+                        help="scale output model")
     parser.add_argument('component', nargs='?',
                         help="component model to generate or 'all'")
     return parser
@@ -102,13 +104,13 @@ def makeOne(args, name, generator, package):
     fname = odir+'/'+name
     fuse = not args.dont_fuse
     if args.step:
-        export("STEP", model, fname+'.step', fuse)
+        export("STEP", model, fname+'.step', fuse, args.scale)
     if args.vrml:
-        export("VRML", model, fname+'.wrl', fuse)
+        export("VRML", model, fname+'.wrl', fuse, args.scale)
     if args.x3d:
-        export("X3D", model, fname+'.x3d', fuse)
+        export("X3D", model, fname+'.x3d', fuse, args.scale)
     if args.freecad:
-        export("FREECAD", model, fname+'.fcstd', fuse)
+        export("FREECAD", model, fname+'.fcstd', fuse, args.scale)
     print("Done %s:%s..." % (package, name))
 
 def make(args):
