@@ -1,0 +1,5 @@
+*.x3d
+*.wrl
+*.step
+*.fcstd
+output/
