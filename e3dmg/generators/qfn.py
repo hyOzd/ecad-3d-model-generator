@@ -29,7 +29,7 @@ from e3dmg import ComponentModel, Generator
 from e3dmg.cqutils import crect
 from math import tan, radians
 
-class QFNGen(Generator):
+class BaseQFNGen(Generator):
 
     def __init__(self, D, E, A, A1, b, e, npx, npy, epad,
                  flanged=False, D1=None, E1=None, the=None, P=None):
@@ -58,7 +58,7 @@ class QFNGen(Generator):
         self.the = the    # mold draft angle
         self.P = P        # corner chamfer
 
-        self.case_color = (0.1, 0.1, 0.1)
+        self.case_color = (0.3, 0.3, 0.3)
         self.pins_color = (0.9, 0.9, 0.9)
 
     def generate(self):
@@ -183,3 +183,14 @@ class QFNGen(Generator):
         model.addPart(pins, self.pins_color, "pins")
 
         return model
+
+class QFNGen(BaseQFNGen):
+
+    def __init__(self, D, E, A, A1, b, e, np, epad):
+        BaseQFNGen.__init__(self, D, E, A, A1, b, e, np/4, np/4, epad)
+
+class MQFNGen(BaseQFNGen):
+
+    def __init__(self, D, E, D1, E1, A, A1, P, b, e, np, epad):
+        BaseQFNGen.__init__(self, D, E, A, A1, b, e, np/4, np/4, epad,
+                            flanged=True, D1=D1, E1=E1, P=P, the=12)
