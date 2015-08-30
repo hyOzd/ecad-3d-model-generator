@@ -70,7 +70,7 @@ def exportX3D(objects, filepath):
         shapeNode = getShapeNode(o.points, o.faces, o.color)
         sceneNode.append(shapeNode)
 
-    with open(filepath, "wr") as f:
+    with open(filepath, "w") as f:
         f.write(et.tostring(fileNode))
 
 def getDocumentDir(doc):
