@@ -18,35 +18,28 @@
 # along with ecad-3d-model-generator.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-# Dimensions are from Microchip Packaging Specifications
+#
+# This file contains drawing utilities for cadquery.
+#
 
-from e3dmg.generators.qfn import QFNGen
-
-QFN16_3x3 = QFNGen(
-    D = 3.0,
-    E = 3.0,
-    A = 0.90,
-    A1 = 0.02,
-    b = 0.25,
-    e = 0.5,
-    npx = 4,
-    npy = 4,
-    epad = (1.7, 1.7)
-)
-
-MQFN24_4x4 = QFNGen(
-    D = 4.0,
-    E = 4.0,
-    A = 0.90,
-    A1 = 0.02,
-    b = 0.25,
-    e = 0.5,
-    npx = 6,
-    npy = 6,
-    epad = (2.5, 2.5),
-    flanged = True,
-    D1 = 3.75,
-    E1 = 3.75,
-    the = 12,
-    P = 0.42
-)
+def crect(wp, rw, rh, cv1, cv):
+    """
+    Creates a rectangle with chamfered corners.
+    wp: workplane object
+    rw: rectangle width
+    rh: rectangle height
+    cv1: chamfer value for 1st corner (lower left)
+    cv: chamfer value for other corners
+    """
+    points = [
+        (-rw/2., -rh/2.+cv1),
+        (-rw/2., rh/2.-cv),
+        (-rw/2.+cv, rh/2.),
+        (rw/2.-cv, rh/2.),
+        (rw/2., rh/2.-cv),
+        (rw/2., -rh/2.+cv),
+        (rw/2.-cv, -rh/2.),
+        (-rw/2.+cv1, -rh/2.),
+        (-rw/2., -rh/2.+cv1)
+    ]
+    return wp.polyline(points)

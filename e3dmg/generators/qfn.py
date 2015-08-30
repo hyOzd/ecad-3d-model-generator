@@ -26,10 +26,13 @@
 
 import cadquery as cq
 from e3dmg import ComponentModel, Generator
+from e3dmg.cqutils import crect
+from math import tan, radians
 
 class QFNGen(Generator):
 
-    def __init__(self, D, E, A, A1, b, e, npx, npy, epad):
+    def __init__(self, D, E, A, A1, b, e, npx, npy, epad,
+                 flanged=False, D1=None, E1=None, the=None, P=None):
         self.D = D        # body overall length
         self.E = E        # body overall width
         self.A = A        # overall height
@@ -47,6 +50,13 @@ class QFNGen(Generator):
         self.fp_d = 0.05  # first pin indicator depth
         self.fp_t = 0.2   # first pin indicator distance from edge
         self.ecc = 0.2    # epad fpi corner chamfer
+
+        # parameters specific to molded case type
+        self.flanged = flanged # case type flanged (molded) or standard (saw cut)
+        self.D1 = D1      # molded top length
+        self.E1 = E1      # molded top width
+        self.the = the    # mold draft angle
+        self.P = P        # corner chamfer
 
         self.case_color = (0.1, 0.1, 0.1)
         self.pins_color = (0.9, 0.9, 0.9)
@@ -73,21 +83,50 @@ class QFNGen(Generator):
             D2 = self.epad[0]
             E2 = self.epad[1]
 
+        if self.flanged:
+            D1 = self.D1
+            E1 = self.E1
+            the = self.the
+            P = self.P
+
         # calculated dimensions
         A2 = A - A1
 
         # draw the case
         cw = D-A1*2
         cl = E-A1*2
-        case = cq.Workplane("XY").workplane(offset=A1). \
-               box(cw, cl, A2, centered=(True,True,False)) # margin (A1) to see fused pins
-        case = case.edges("|Z").fillet(ef)
-        case = case.faces(">Z").fillet(ef)
+        if not self.flanged: # standard simple box style case
+            case = cq.Workplane("XY").workplane(offset=A1). \
+                   box(cw, cl, A2, centered=(True,True,False)) # margin (A1) to see fused pins
+            case = case.edges("|Z").fillet(ef)
+            case = case.faces(">Z").fillet(ef)
+            # draw first pin indicator
+            fp_x = -(cw/2)+fp_t+fp_r
+            fp_y = -(cl/2)+fp_t+fp_r
+            case = case.faces(">Z").workplane().center(fp_x, fp_y).hole(fp_r*2, fp_d)
+        else: # molded case type
+            D1_t = D1-2*tan(radians(the))*(A-A3)
+            E1_t = E1-2*tan(radians(the))*(A-A3)
+            case = cq.Workplane("XY").workplane(offset=A1)
+            case = crect(case, cw, cl, P, P)
+            case = case.extrude(A3-A1)
+            case = case.faces(">Z").workplane()
+            case = crect(case, D1, E1, P*0.8, P*0.8).\
+                   workplane(offset=A-A3)
+            case = crect(case, D1_t, E1_t, P*0.6, P*0.6).\
+                   loft(ruled=True)
 
-        # draw first pin indicator
-        fp_x = -(cw/2)+fp_t+fp_r
-        fp_y = -(cl/2)+fp_t+fp_r
-        case = case.faces(">Z").workplane().center(fp_x, fp_y).hole(fp_r*2, fp_d)
+            # fillet the bottom vertical edges
+            case = case.edges("|Z").fillet(ef)
+
+            # fillet top and side faces of the top molded part
+            BS = cq.selectors.BoxSelector
+            case = case.edges(BS((-D1/2, -E1/2, A3+0.001), (D1/2, E1/2, A+0.001))).fillet(ef)
+
+            # draw first pin indicator
+            fp_x = -(D1_t/2)+fp_t+fp_r
+            fp_y = -(E1_t/2)+fp_t+fp_r
+            case = case.faces(">Z").workplane().center(fp_x, fp_y).hole(fp_r*2, fp_d)
 
         # draw pins
         bpin = cq.Workplane("XY").\
