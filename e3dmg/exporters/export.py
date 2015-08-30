@@ -29,13 +29,13 @@ import os
 import FreeCAD, FreeCADGui
 import cadquery as cq
 
-def makeFCObject(doc, cqobject, color=None):
+def makeFCObject(doc, name, cqobject, color=None):
     """Creates an Object in document tree.
     `doc` : FreeCAD document object
     `cqobject` : cadquery object
     `color` : color RGB tuple
     """
-    o = doc.addObject("Part::Feature", "Box")
+    o = doc.addObject("Part::Feature", name)
     o.Shape = cqobject.toFreecad()
     if color: o.ViewObject.ShapeColor = color
     return o
@@ -55,7 +55,7 @@ def exportx3d(objects, filename):
 
     exportX3D(meshes, filename)
 
-def export(ftype, componentModel, filename, fuse=False, scale=None):
+def export(ftype, componentName, componentModel, filename, fuse=False, scale=None):
     """ Exports given ComponentModel object using FreeCAD.
 
     `ftype` : one of "STEP", "VRML", "FREECAD", "X3D"
@@ -100,10 +100,11 @@ def export(ftype, componentModel, filename, fuse=False, scale=None):
     doc = FreeCAD.newDocument()
 
     # create objects
-    fcobjects = [makeFCObject(doc, co[0], co[1]) for co in objects]
+    fcobjects = [makeFCObject(doc, componentName+"_"+co[2], co[0], co[1])
+                 for co in objects]
 
     if fuse:
-        fuseobj = doc.addObject("Part::MultiFuse","Fusion")
+        fuseobj = doc.addObject("Part::MultiFuse", componentName)
         fuseobj.Shapes = fcobjects
         doc.recompute()
         exportObjects = [fuseobj]

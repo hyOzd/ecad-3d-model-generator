@@ -104,13 +104,13 @@ def makeOne(args, name, generator, package):
     fname = odir+'/'+name
     fuse = not args.dont_fuse
     if args.step:
-        export("STEP", model, fname+'.step', fuse, args.scale)
+        export("STEP", name, model, fname+'.step', fuse, args.scale)
     if args.vrml:
-        export("VRML", model, fname+'.wrl', fuse, args.scale)
+        export("VRML", name, model, fname+'.wrl', fuse, args.scale)
     if args.x3d:
-        export("X3D", model, fname+'.x3d', fuse, args.scale)
+        export("X3D", name, model, fname+'.x3d', fuse, args.scale)
     if args.freecad:
-        export("FREECAD", model, fname+'.fcstd', fuse, args.scale)
+        export("FREECAD", name, model, fname+'.fcstd', fuse, args.scale)
     print("Done %s:%s..." % (package, name))
 
 def make(args):
