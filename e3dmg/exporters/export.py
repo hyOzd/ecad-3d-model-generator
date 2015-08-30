@@ -130,8 +130,8 @@ def export(ftype, componentName, componentModel, filename, fuse=False, scale=Non
         # TODO: ensure the filename ends with .wrl
         FreeCADGui.export(exportObjects, filename)
     elif ftype == "FREECAD":
-        # TODO: export only the exportObjects by moving to a new
-        #       document or deleting other objects
+        for obj in list(doc.Objects):
+            if not (obj in exportObjects): doc.removeObject(obj.Name)
         doc.saveAs(filename)
     else:
         raise Exception("Unknown export file type!")
