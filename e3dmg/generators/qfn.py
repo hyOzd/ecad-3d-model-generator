@@ -95,8 +95,8 @@ class QFNGen(Generator):
                 lineTo(b, L-b/2). \
                 threePointArc((b/2,L),(0, L-b/2)). \
                 lineTo(0, 0). \
-                close().extrude(A3).translate((b/2,E/2,A1/2)). \
-                rotate((b/2,E/2,A1/2), (0,0,1), 180)
+                close().extrude(A3).translate((b/2,E/2,0)). \
+                rotate((b/2,E/2,0), (0,0,1), 180)
 
         pins = []
 
