@@ -121,18 +121,28 @@ def export(ftype, componentName, componentModel, filename, fuse=False, scale=Non
     doc.recompute()
 
     if ftype == "STEP":
+        # check filename
+        if not os.path.splitext(filename)[1] in ['.stp', '.step']:
+            raise Exception("Filename for STEP export must end with '.stp' or '.step'.")
         ImportGui.export(exportObjects, filename)
+
     elif ftype == "VRML":
+        # check filename
+        if not os.path.splitext(filename)[1] in ['.wrl', '.vrml']:
+            raise Exception("Filename for VRML export must end with '.wrl' or '.vrml'.")
+
         # workaround for not exporting unselected objects (v0.16)
         # http://www.freecadweb.org/tracker/view.php?id=2221
         FreeCADGui.Selection.clearSelection()
         for o in exportObjects: FreeCADGui.Selection.addSelection(o)
-        # TODO: ensure the filename ends with .wrl
+
         FreeCADGui.export(exportObjects, filename)
+
     elif ftype == "FREECAD":
         for obj in list(doc.Objects):
             if not (obj in exportObjects): doc.removeObject(obj.Name)
         doc.saveAs(filename)
+
     else:
         raise Exception("Unknown export file type!")
 
