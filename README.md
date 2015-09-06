@@ -9,14 +9,13 @@ Scripts are implemented with Python. We use
 [FreeCAD](http://freecadweb.org/) APIs for modeling and exporting.
 
 ## Currently Included Generators
-TODO: actually add generators to repository
 - QFP
 - DIP
-- 0.1in straight pin header
+- QFN
+- Radial Capacitor
 
 ## Where are the model files?
 
-Model files are uploaded to a separate repository to keep this git
-repository small in size. You can find models in different formats here:
-
-TODO: create model repository and put a link here
+Model files are to be uploaded to a separate repository to keep this
+git repository small in size. You can will be able to download models
+from there in STEP, VRML, X3D and FreeCAD formats.
