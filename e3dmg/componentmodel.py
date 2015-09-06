@@ -28,3 +28,12 @@ class ComponentModel:
     def addPart(self, cqobject, color, name=None):
         """Add a cqobject as part of this ComponentModel."""
         self.parts.append((cqobject, color, name))
+
+    def show(self):
+        """Displays the model using cadquery helper functions. These functions
+        are provided by cadquery-freecad-module thus you should call
+        this method only from FreeCad Cadquery workbench."""
+        import Helpers
+        for p in self.parts:
+            color = (p[1][0]*255, p[1][1]*255, p[1][2]*255, 0)
+            Helpers.show(p[0], color)
