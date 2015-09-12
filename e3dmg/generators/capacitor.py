@@ -164,3 +164,137 @@ class RadialGen(Generator):
         model.addPart(leads, self.lead_color, "pins")
 
         return model
+
+class RadialSMDGen(Generator):
+    """Radial SMD capacitor generator.
+
+    Basic shape and dimension letters are based on
+    http://industrial.panasonic.com/lecs/www-data/pdf/ABA0000/ABA0000CE120.pdf
+    """
+
+    def __init__(self, L, D, A, H, P, W):
+
+        self.L = L    # overall height
+        self.D = D    # diameter
+        self.A = A    # base width (x&y)
+        self.H = H    # max width (x) with pins
+        self.P = P    # distance between pins
+        self.W = W    # pin width
+
+        self.c = 0.15  # pin thickness
+
+        self.bh = 1.0 # belt start height
+        self.br = 0.2 # belt radius
+        self.bf = 0.1 # belt fillet
+
+        self.D2 = A+0.1  # cut diameter
+
+        self.h1 = 1.  # bottom plastic height, cathode side
+        self.h2 = 0.5 # bottom plastic base height, mid side
+        self.h3 = 0.7 # bottom plastic height, anode side
+
+        self.cf = 0.4  # cathode side corner fillet
+        self.ac = A/5. # anode side chamfer
+
+        self.ef = 0.2 # fillet of the top and bottom edges of the metallic body
+
+        self.body_color = (0.859, 0.859, 0.859)
+        self.base_color = (0.156, 0.156, 0.156)
+
+    def generate(self):
+
+        L = self.L    # overall height
+        D = self.D    # diameter
+        A = self.A    # base width (x&y)
+        H = self.H    # max width (x) with pins
+        P = self.P    # distance between pins
+        W = self.W    # pin width
+
+        c = self.c  # pin thickness
+
+        bh = self.bh # belt start height
+        br = self.br # belt radius
+        bf = self.bf # belt fillet
+
+        D2 = self.D2  # cut diameter
+
+        h1 = self.h1  # bottom plastic height, cathode side
+        h2 = self.h2  # bottom plastic base height, mid side
+        h3 = self.h3  # bottom plastic height, anode side
+
+        cf = self.cf  # cathode side corner fillet
+        ac = self.ac  # anode side chamfer
+
+        ef = self.ef
+
+        cimw = D/2.*0.7 # cathode identification mark width
+
+        # draw aluminium the body
+        body = cq.Workplane("XZ", (0,0,c+h2)).\
+               lineTo(D/2., 0).\
+               line(0, bh).\
+               threePointArc((D/2.-br, bh+br), (D/2., bh+2*br)).\
+               lineTo(D/2., L-c-h2).\
+               line(-D/2, 0).\
+               close().revolve()
+
+        # fillet the belt edges
+        BS = cq.selectors.BoxSelector
+        body = body.edges(BS((-0.1,-0.1,c+h2+0.1), (0.1,0.1,L-0.1))).\
+               fillet(bf)
+
+        # fillet the top and bottom
+        body = body.faces(">Z").fillet(ef).\
+               faces("<Z").fillet(ef)
+
+        # draw the plastic base
+        base = cq.Workplane("XY", (0,0,c)).\
+               moveTo(-A/2.,-A/2.).\
+               line(A-ac, 0).\
+               line(ac, ac).\
+               line(0, A-2*ac).\
+               line(-ac, ac).\
+               line(-A+ac, 0).\
+               close().extrude(h1)
+
+        # fillet cathode side
+        base = base.edges(BS((-A,-A,0), (-A/2.+0.01,-A/2.+0.01,c+h1+0.01))).\
+               fillet(cf).\
+               edges(BS((-A,A,0), (-A/2.+0.01,A/2.-0.01,c+h1+0.01))).\
+               fillet(cf)
+
+        # cut base center
+        base = base.cut(
+            cq.Workplane("XY", (0,0,c+h2)).\
+            circle(D2/2.).extrude(h1-h2))
+
+        # cut anode side of the base
+        base = base.cut(
+            cq.Workplane("XY", (0,-A/2.,c+h3)).\
+            box(A/2., A, h1-h3, centered=(False, False, False)))
+
+        # draw pins
+        pins = cq.Workplane("XY").\
+               moveTo(H/2., -W/2.).\
+               line(0, W).\
+               lineTo(P/2.+W/2., W/2.).\
+               threePointArc((P/2.,0), (P/2.+W/2., -W/2)).\
+               close().extrude(c)
+
+        pins = pins.union(pins.rotate((0,0,0), (0,0,1), 180))
+
+        # draw the cathode identification mark
+        cim = cq.Workplane("XY", (-D/2.,0,L-ef)).\
+              box(cimw, D, ef, centered=(False, True, False))
+
+        # do intersection
+        cim = cim.cut(cim.translate((0,0,0)).cut(body))
+
+        body.cut(cim)
+
+        model = ComponentModel()
+        model.addPart(body, self.body_color, "body")
+        model.addPart(base, self.base_color, "base")
+        model.addPart(pins, self.body_color, "pins")
+        model.addPart(cim, (0.,0.,0.), "mark")
+        return model
