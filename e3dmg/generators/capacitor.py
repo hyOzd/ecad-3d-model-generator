@@ -21,6 +21,8 @@
 import cadquery as cq
 from e3dmg import ComponentModel, Generator
 
+from math import sqrt
+
 class RadialGen(Generator):
     """Radial capacitor generator."""
 
@@ -36,10 +38,10 @@ class RadialGen(Generator):
 
         self.bs = bs   # board separation
 
-        self.br = 0.7       # radius of the belt hollow
-        self.bx = 0.5       # center of the belt (sideways from the body)
-        self.bd = 1.5       # center of the belt (from the bottom of the body)
-        self.bf = 0.6       # belt fillet
+        self.bt = 1.        # flat part before belt
+        self.bd = 0.2       # depth of the belt
+        self.bh = 1.        # height of the belt
+        self.bf = 0.3       # belt fillet
 
         self.tc = 0.2       # cut thickness for the bottom&top
         self.dc = D*0.7     # diameter of the bottom&top cut
@@ -64,9 +66,9 @@ class RadialGen(Generator):
 
         bs = self.bs     # board separation
 
-        br = self.br      # radius of the belt hollow
-        bx = self.bx      # center of the belt (sideways from the body)
-        bd = self.bd      # center of the belt (from the bottom of the body)
+        bt = self.bt      # flat part before belt
+        bd = self.bd      # depth of the belt
+        bh = self.bh      # height of the belt
         bf = self.bf      # belt fillet
 
         tc = self.tc      # cut thickness for the bottom
@@ -80,40 +82,49 @@ class RadialGen(Generator):
         tmt = ts*2       # top metallic part thickness (not visual)
 
         # TODO: calculate width of the cathode marker bar from the body size
-        ciba = 45  # angle of the cathode identification bar
+        ciba = 45.  # angle of the cathode identification bar
 
         # TODO: calculate marker sizes according to the body size
         mmb_h = 2.       # lenght of the (-) marker on the cathode bar
         mmb_w = 0.5      # rough width of the marker
 
-        # draw the radial body
-        body = cq.Workplane("XY").workplane(offset=bs).\
-               circle(D/2).extrude(L).\
-               faces(">Z").fillet(ef)
+        ef_s2 = ef/sqrt(2)
+        ef_x = ef-ef/sqrt(2)
 
-        # draw and cut the belt
-        belt = cq.Workplane("XZ").center(D/2+bx,bs+bd).circle(br).\
-               center(-D/2-bx,0).revolve()
-        body = body.cut(belt)
+        def bodyp():
+            return cq.Workplane("XZ").move(0, bs).\
+                   move(0, tc+bpt).\
+                   line(dc/2., 0).\
+                   line(0, -(tc+bpt)).\
+                   line(D/2.-dc/2.-ef, 0).\
+                   threePointArc((D/2.-(ef_x), bs+(ef_x)), (D/2., bs+ef)).\
+                   line(0, bt).\
+                   threePointArc((D/2.-bd, bs+bt+bh/2.), (D/2., bs+bt+bh)).\
+                   lineTo(D/2., L+bs-ef).\
+                   threePointArc((D/2.-(ef_x), L+bs-(ef_x)), (D/2.-ef, L+bs)).\
+                   lineTo(dc/2., L+bs).\
+                   line(0, -(tc+tmt)).\
+                   line(-dc/2., 0).\
+                   close()
 
-        # fillet the belt edges
+        body = bodyp().revolve(360-ciba, (0,0,0), (0,1,0))
+        bar = bodyp().revolve(ciba, (0,0,0), (0,1,0))
+
+        # # fillet the belt edges
         BS = cq.selectors.BoxSelector
         # note that edges are selected from their centers
-        body = body.edges(BS((-0.1,-0.1, bs+0.1), (0.1, 0.1, bs+bd+br))).\
-            fillet(bf)
+        body = body.edges(BS((-0.5,-0.5, bs+bt-0.01), (0.5, 0.5, bs+bt+bh+0.01))).\
+               fillet(bf)
+        b_r = D/2.-bd # inner radius of the belt
+        bar = bar.edges(BS((b_r/sqrt(2), 0, bs+bt-0.01),(b_r, -b_r/sqrt(2), bs+bt+bh+0.01))).\
+              fillet(bf)
 
-        # fillet the bottom of the body
-        body = body.faces("<Z").fillet(ef)
-
-        # cut the bottom of the body
-        body = body.faces("<Z").workplane().hole(dc, tc+bpt)
+        body = body.rotate((0,0,0), (0,0,1), 180-ciba/2)
+        bar = bar.rotate((0,0,0), (0,0,1), 180+ciba/2)
 
         # draw the plastic at the bottom
         bottom = cq.Workplane("XY").workplane(offset=bs+tc).\
                  circle(dc/2).extrude(bpt)
-
-        # cut the top
-        body = body.faces(">Z").workplane().hole(dc, tc+tmt)
 
         # draw the metallic part at the top
         top = cq.Workplane("XY").workplane(offset=bs+L-tc-ts).\
@@ -126,12 +137,6 @@ class RadialGen(Generator):
               line(0,-D).line(ws,0).line(0,D).\
               line(D,0).line(0,ws).close().cutBlind(-ts)
 
-        # draw the cathode identification bar
-        bar = cq.Workplane("XY").line(-D, 0).line(0,D).close().extrude(bs+L)
-        bar = bar.cut(bar.translate((0,0,0)).cut(body)) # translate is used for copying
-        # rotate so that it aligns with cathode pin
-        bar = bar.rotate((0,0,0),(0,0,1),45/2.)
-
         # draw the (-) marks on the bar
         n = int(L/(2*mmb_h)) # number of (-) marks to draw
         points = []
@@ -142,8 +147,8 @@ class RadialGen(Generator):
               box(mmb_w, mmb_h, 2).\
               edges("|X").fillet(mmb_w/2.-0.001)
 
+        mmb = mmb.cut(mmb.translate((0,0,0)).cut(bar))
         bar = bar.cut(mmb)
-        body = body.cut(bar)
 
         # draw the leads
         leads = cq.Workplane("XY").workplane(offset=bs+tc).\
@@ -152,6 +157,7 @@ class RadialGen(Generator):
 
         model = ComponentModel()
         model.addPart(body, self.body_color, "body")
+        model.addPart(mmb, self.body_color, "marks")
         model.addPart(top, self.top_color, "top")
         model.addPart(bottom, self.bottom_color, "bottom")
         model.addPart(bar, self.bar_color, "bar")
