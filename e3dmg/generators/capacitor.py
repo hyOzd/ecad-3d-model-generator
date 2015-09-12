@@ -26,7 +26,7 @@ from math import sqrt
 class RadialGen(Generator):
     """Radial capacitor generator."""
 
-    def __init__(self, L, D, d, F, ll=4., la=1., bs=1.,
+    def __init__(self, L, D, d, F, ll=4., la=0., bs=1.,
                  body_color=(0.797, 0.234, 0.234)):
 
         self.L = L     # overall height of the body
