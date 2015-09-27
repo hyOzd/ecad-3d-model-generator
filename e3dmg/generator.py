@@ -18,7 +18,7 @@
 # along with ecad-3d-model-generator.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-class Generator:
+class Generator(object):
     """This is abstract generator class. All other generators must inherit
     this one."""
     pass

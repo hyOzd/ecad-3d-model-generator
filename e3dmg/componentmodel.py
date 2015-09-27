@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-class ComponentModel:
+class ComponentModel(object):
 
     def __init__(self):
         # list of tuples: (cqobject, part_color, part_name)
