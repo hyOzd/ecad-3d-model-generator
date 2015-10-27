@@ -83,8 +83,11 @@ class BaseQFNGen(Generator):
         ecc = self.ecc
 
         if self.epad:
-            D2 = self.epad[0]
-            E2 = self.epad[1]
+            if type(self.epad) == tuple:
+                D2 = self.epad[0]
+                E2 = self.epad[1]
+            else: # assuming type(self.epad) float or int
+                E2 = D2 = self.epad
 
         if self.flanged:
             D1 = self.D1
