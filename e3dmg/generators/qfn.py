@@ -53,6 +53,9 @@ class BaseQFNGen(Generator):
 
         # parameters specific to molded case type
         self.flanged = flanged # case type flanged (molded) or standard (saw cut)
+        if flanged and (not all([D1, E1, the, P])):
+            raise Exception("For molded package type D1, E1, the and P"
+                            "parameters must be provided!")
         self.D1 = D1      # molded top length
         self.E1 = E1      # molded top width
         self.the = the    # mold draft angle
