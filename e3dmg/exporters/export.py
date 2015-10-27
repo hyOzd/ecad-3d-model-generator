@@ -136,6 +136,9 @@ def export(ftype, componentName, componentModel, filename, fuse=False, scale=Non
         FreeCADGui.Selection.clearSelection()
         for o in exportObjects: FreeCADGui.Selection.addSelection(o)
 
+        # deal with points and lines
+        for o in exportObjects: o.ViewObject.DisplayMode = "Shaded"
+
         FreeCADGui.export(exportObjects, filename)
 
     elif ftype == "FREECAD":
