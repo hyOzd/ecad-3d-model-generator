@@ -19,6 +19,18 @@
 # <http://www.gnu.org/licenses/>.
 #
 
+class Material(object):
+    def __init__(self, diffuseColor, ambientIntensity = .2,
+                 specularColor = (0,0,0), shininess = .2,
+                 emissiveColor = (0,0,0), transparency = 0):
+        """Default values are taken from VRML 2.0 specification."""
+        self.diffuseColor = diffuseColor
+        self.ambientIntensity = ambientIntensity
+        self.specularColor = specularColor
+        self.shininess = shininess
+        self.emissiveColor = emissiveColor
+        self.transparency = transparency
+
 class ComponentModel(object):
 
     def __init__(self):

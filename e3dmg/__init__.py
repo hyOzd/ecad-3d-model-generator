@@ -23,4 +23,5 @@
 #
 
 from e3dmg.componentmodel import ComponentModel
+from e3dmg.componentmodel import Material
 from e3dmg.generator import Generator

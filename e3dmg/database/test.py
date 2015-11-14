@@ -23,11 +23,19 @@
 #
 
 from e3dmg.generators.box import BoxGen
+from e3dmg import Material
 
 red = (1.,0.,0.)
 green = (0.,1.,0.)
 blue = (0.,0.,1.)
 
+chrome = Material(diffuseColor = (.3, .3, .3),
+                  ambientIntensity = 0.3,
+                  specularColor = (.7, .7, .8),
+                  shininess = .09)
+
 cube5x5x5 = BoxGen(5,5,5,red)
 cube10x10x10 = BoxGen(10,10,10,green)
 cube15x15x15 = BoxGen(15,15,15,blue)
+
+chrome_cube = BoxGen(5,5,5,chrome)
