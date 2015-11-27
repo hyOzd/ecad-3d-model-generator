@@ -39,9 +39,7 @@ def makeFCObject(doc, name, cqobject, color=None):
     obj = doc.addObject("Part::Feature", name)
     obj.Shape = cqobject.toFreecad()
     vobj = obj.ViewObject
-    if isinstance(color, Color):
-        vobj.ShapeColor = color
-    elif isinstance(color, Material):
+    if isinstance(color, Material):
         vobj.ShapeColor = color.diffuseColor
         vobj.ShapeMaterial.DiffuseColor = color.diffuseColor
         vobj.ShapeMaterial.AmbientColor = tuple(f*color.ambientIntensity for f in color.diffuseColor)
@@ -49,6 +47,8 @@ def makeFCObject(doc, name, cqobject, color=None):
         vobj.ShapeMaterial.Shininess = color.shininess
         vobj.ShapeMaterial.EmissiveColor = color.emissiveColor
         vobj.ShapeMaterial.Transparency = color.transparency
+    else:
+        vobj.ShapeColor = color
 
     return obj
 
