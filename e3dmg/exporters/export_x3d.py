@@ -73,14 +73,6 @@ def exportX3D(objects, filepath):
     with open(filepath, "w") as f:
         f.write(et.tostring(fileNode))
 
-def getDocumentDir(doc):
-    """Returns directory for given document. `None` if the file is not
-    saved yet."""
-    if doc.FileName:
-        return os.path.dirname(doc.FileName)
-    else:
-        return None
-
 def objectToMesh(obj, tessellation = 1.0):
     """Returns a Mesh object from given FreeCAD object. Returns None if
     object cannot be converted to Mesh."""
