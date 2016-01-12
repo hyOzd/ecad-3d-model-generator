@@ -3,3 +3,4 @@
 *.step
 *.fcstd
 output/
+*.pyc
