@@ -52,7 +52,7 @@ def exportVRML(objects, filepath):
             f.write("coord Coordinate { point [")
 
             # write coordinate points for each vertex
-            f.write(','.join('%.3f,%.3f,%.3f' % (p.x, p.y, p.z) for p in obj.points))
+            f.write(','.join('%.3f %.3f %.3f' % (p.x, p.y, p.z) for p in obj.points))
 
             f.write("]}") # closes Coordinate
 
