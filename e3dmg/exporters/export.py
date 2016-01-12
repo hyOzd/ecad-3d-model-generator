@@ -52,20 +52,31 @@ def makeFCObject(doc, name, cqobject, color=None):
 
     return obj
 
+def shapeToMesh(shape, color):
+    from export_x3d import Mesh
+    mesh_data = shape.tessellate(1)
+    return Mesh(points = mesh_data[0],
+                faces = mesh_data[1],
+                color = color)
+
 def exportx3d(objects, filename):
     from export_x3d import exportX3D, objectToMesh, Mesh
-
-    def shapeToMesh(shape, color):
-        mesh_data = shape.tessellate(1)
-        return Mesh(points = mesh_data[0],
-                    faces = mesh_data[1],
-                    color = color)
 
     meshes = []
     for o in objects:
         meshes.append(shapeToMesh(o[0].toFreecad(), o[1]))
 
     exportX3D(meshes, filename)
+
+def exportvrml(objects, filename):
+    from export_vrml import exportVRML
+    from export_x3d import exportX3D, objectToMesh, Mesh
+
+    meshes = []
+    for o in objects:
+        meshes.append(shapeToMesh(o[0].toFreecad(), o[1]))
+
+    exportVRML(meshes, filename)
 
 def export(ftype, componentName, componentModel, filename, fuse=False, scale=None):
     """ Exports given ComponentModel object using FreeCAD.
@@ -88,11 +99,16 @@ def export(ftype, componentName, componentModel, filename, fuse=False, scale=Non
     if len(objects) == 1: # can't fuse if there is only 1 object
         fuse = False
 
-    # export to X3D, continue for other exporters (VRML, FREECAD, STEP)
+    # export to X3D or Simple VRML, continue for other exporters (VRML, FREECAD, STEP)
     if ftype == "X3D":
         if fuse: print("X3D exporter can't do fuse, ignoring.")
         if scale: print("X3D exporter can't do scale, ignoring.")
         exportx3d(objects, filename)
+        return
+    elif ftype == "S_VRML":
+        if fuse: print("Simple VRML exporter can't do fuse, ignoring.")
+        if scale: print("Simple VRML exporter can't do scale, ignoring.")
+        exportvrml(objects, filename)
         return
 
     # init FreeCADGui

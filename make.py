@@ -35,6 +35,8 @@ def initParser():
         epilog="""
 
   * if no output type is specified all types are enabled by default
+  ** --s_vrml option should produce a smaller VRML file but its features are limited
+  *** --vrml and --s_vrml can't be selected at the same time
 
 Examples:
 
@@ -61,6 +63,8 @@ Create STEP files for all components:
                         help="generate a STEP file")
     parser.add_argument('--vrml', action='store_true',
                         help="generate a VRML file")
+    parser.add_argument('--s_vrml', action='store_true',
+                        help="generate a VRML file using simple exporter")
     parser.add_argument('--x3d', action='store_true',
                         help="generate a X3D file")
     parser.add_argument('--freecad', action='store_true',
@@ -107,6 +111,8 @@ def makeOne(args, name, generator, package):
         export("STEP", name, model, fname+'.step', fuse, args.scale)
     if args.vrml:
         export("VRML", name, model, fname+'.wrl', fuse, args.scale)
+    if args.s_vrml:
+        export("S_VRML", name, model, fname+'.wrl', fuse, args.scale)
     if args.x3d:
         export("X3D", name, model, fname+'.x3d', fuse, args.scale)
     if args.freecad:
@@ -129,10 +135,16 @@ def make(args):
 def run():
     parser = initParser()
     args = parser.parse_args()
+
+    # check arguments
+    if args.vrml and args.s_vrml:
+        raise Exception("VRML and Simple VRML exporters cannot be selected at the same time!")
+
     # select all file types if none selected
-    if not (args.step or args.vrml or args.x3d or args.freecad):
+    if not (args.step or args.vrml or args.s_vrml or args.x3d or args.freecad):
         args.step = True
         args.vrml = True
+        args.s_vrml = False
         args.x3d = True
         args.freecad = True
 
