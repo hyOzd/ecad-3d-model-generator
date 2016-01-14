@@ -32,6 +32,8 @@
 # file size. Main factor is the lack of indentation and new lines.
 #
 
+from e3dmg import Material
+
 def exportVRML(objects, filepath):
     """Export given list of Mesh objects to a VRML file.
 
@@ -59,6 +61,15 @@ def exportVRML(objects, filepath):
             f.write("}\n") # closes IndexedFaceSet
 
             # TODO: materials
-            f.write("appearance Appearance{material Material{diffuseColor %f %f %f}}" % obj.color)
+            if isinstance(obj.color, Material):
+                material = "diffuseColor %f %f %f\n" % obj.color.diffuseColor + \
+                           "ambientIntensity %f\n" % obj.color.ambientIntensity + \
+                           "specularColor %f %f %f\n" % obj.color.specularColor + \
+                           "shininess %f\n" % obj.color.shininess + \
+                           "emissiveColor %f %f %f\n" % obj.color.emissiveColor + \
+                           "transparency %f\n" % obj.color.transparency
+                f.write("appearance Appearance{material Material{%s}}" % material)
+            else:
+                f.write("appearance Appearance{material Material{diffuseColor %f %f %f}}" % obj.color)
 
             f.write("}\n") # closes Shape
