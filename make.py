@@ -44,10 +44,10 @@ List all generators in the database:
     %(prog)s --list-all
 
 List some generators in the database:
-    %(prog)s --list qfp.tqfp
+    %(prog)s --list qfp.jedec
 
 Create a certain model:
-    %(prog)s qfp.tqfp:tqfp5x5x5
+    %(prog)s qfp.jedec:AKA
 
 Create models for all components:
     %(prog)s all
