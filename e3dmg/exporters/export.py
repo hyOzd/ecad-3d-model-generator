@@ -78,7 +78,9 @@ def export(ftype, componentName, componentModel, filename, fuse=False, scale=Non
     #     objects.append((p[0], p[1]))
 
     objects = componentModel.parts
-    # TODO: raise Exception, if there are no objects to export!
+
+    if len(objects) < 1:
+        raise Exception("ComponentModel is empty!")
 
     if len(objects) == 1: # can't fuse if there is only 1 object
         fuse = False
