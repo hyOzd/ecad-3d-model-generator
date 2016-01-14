@@ -60,7 +60,7 @@ def shapeToMesh(shape, color):
                 color = color)
 
 def exportx3d(objects, filename):
-    from export_x3d import exportX3D, objectToMesh, Mesh
+    from export_x3d import exportX3D, Mesh
 
     meshes = []
     for o in objects:
@@ -70,7 +70,7 @@ def exportx3d(objects, filename):
 
 def exportvrml(objects, filename):
     from export_vrml import exportVRML
-    from export_x3d import exportX3D, objectToMesh, Mesh
+    from export_x3d import exportX3D, Mesh
 
     meshes = []
     for o in objects:

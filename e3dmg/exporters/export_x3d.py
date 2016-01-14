@@ -72,18 +72,3 @@ def exportX3D(objects, filepath):
 
     with open(filepath, "w") as f:
         f.write(et.tostring(fileNode))
-
-def objectToMesh(obj, tessellation = 1.0):
-    """Returns a Mesh object from given FreeCAD object. Returns None if
-    object cannot be converted to Mesh."""
-    if hasattr(obj, 'Shape'):
-        mesh = obj.Shape.tessellate(tessellation)
-        if (not mesh[0]) or (not mesh[1]):
-            # some objects (such as Part:Circle) generate empty mesh
-            return None
-        else:
-            return Mesh(points = mesh[0],
-                        faces = mesh[1],
-                        color = obj.ViewObject.ShapeColor[0:3])
-    else:
-        return None
