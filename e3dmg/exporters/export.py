@@ -62,25 +62,6 @@ def shapeToMesh(shape, color, scale=None):
                 faces = mesh_data[1],
                 color = color)
 
-def exportx3d(objects, filename, scale):
-    from export_x3d import exportX3D, Mesh
-
-    meshes = []
-    for o in objects:
-        meshes.append(shapeToMesh(o[0].toFreecad(), o[1], scale))
-
-    exportX3D(meshes, filename)
-
-def exportvrml(objects, filename, scale):
-    from export_vrml import exportVRML
-    from export_x3d import exportX3D, Mesh
-
-    meshes = []
-    for o in objects:
-        meshes.append(shapeToMesh(o[0].toFreecad(), o[1], scale))
-
-    exportVRML(meshes, filename)
-
 def export(ftype, componentName, componentModel, filename, fuse=False, scale=None):
     """ Exports given ComponentModel object using FreeCAD.
 
@@ -103,13 +84,19 @@ def export(ftype, componentName, componentModel, filename, fuse=False, scale=Non
         fuse = False
 
     # export to X3D or Simple VRML, continue for other exporters (VRML, FREECAD, STEP)
-    if ftype == "X3D":
-        if fuse: print("X3D exporter can't do fuse, ignoring.")
-        exportx3d(objects, filename, scale)
-        return
-    elif ftype == "S_VRML":
-        if fuse: print("Simple VRML exporter can't do fuse, ignoring.")
-        exportvrml(objects, filename, scale)
+    if ftype in ["X3D", "S_VRML"]:
+        if fuse: print("%s exporter can't do fuse, ignoring." % ftype)
+
+        from export_x3d import exportX3D, Mesh
+        from export_vrml import exportVRML
+
+        meshes = [shapeToMesh(o[0].toFreecad(), o[1], scale) for o in objects]
+
+        if ftype == "X3D":
+            exportX3D(meshes, filename)
+        else: # S_VRML
+            exportVRML(meshes, filename)
+
         return
 
     # init FreeCADGui
