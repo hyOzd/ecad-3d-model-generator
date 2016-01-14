@@ -73,10 +73,6 @@ def export(ftype, componentName, componentModel, filename, fuse=False, scale=Non
 
     X3D exporter doesn't support `fuse` parameter.
     """
-    # objects = []
-    # for p in componentModel.parts:
-    #     objects.append((p[0], p[1]))
-
     objects = componentModel.parts
 
     if len(objects) < 1:
