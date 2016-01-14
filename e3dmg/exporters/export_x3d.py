@@ -32,17 +32,18 @@ import FreeCAD
 import xml.etree.ElementTree as et
 import os
 from collections import namedtuple
+from e3dmg import Material
 
 # points: [Vector, Vector, ...]
 # faces: [(pi, pi, pi), ], pi: point index
 # color: (Red, Green, Blue), values range from 0 to 1.0
 Mesh = namedtuple('Mesh', ['points', 'faces', 'color'])
 
-def getShapeNode(vertices, faces, diffuseColor=None):
+def getShapeNode(vertices, faces, color=None):
     """Returns a <Shape> node for given mesh data.
     vertices: list of vertice coordinates as `Vector` type
     faces: list of tuple of vertice indexes ex: (1, 2, 3)
-    diffuseColor: tuple in the form of (R, G, B)"""
+    color: tuple in the form of (R, G, B) or `componentmodel.Material`"""
 
     shapeNode = et.Element('Shape')
     faceNode = et.SubElement(shapeNode, 'IndexedFaceSet')
@@ -51,10 +52,20 @@ def getShapeNode(vertices, faces, diffuseColor=None):
     coordinateNode.set('point',
         ' '.join(["%f %f %f" % (p.x, p.y, p.z) for p in vertices]))
 
-    if diffuseColor:
-        appearanceNode = et.SubElement(shapeNode, 'Appearance')
-        materialNode = et.SubElement(appearanceNode, 'Material')
-        materialNode.set('diffuseColor', "%f %f %f" % diffuseColor)
+    if color != None:
+        if isinstance(color, Material):
+            appearanceNode = et.SubElement(shapeNode, 'Appearance')
+            materialNode = et.SubElement(appearanceNode, 'Material')
+            materialNode.set('diffuseColor', "%f %f %f" % color.diffuseColor)
+            materialNode.set('ambientIntensity', "%f" % color.ambientIntensity)
+            materialNode.set('specularColor', "%f %f %f" % color.specularColor)
+            materialNode.set('shininess', "%f" % color.shininess)
+            materialNode.set('emissiveColor', "%f %f %f" % color.emissiveColor)
+            materialNode.set('transparency', "%f" % color.transparency)
+        else: # tuple of (R, G, B) expected
+            appearanceNode = et.SubElement(shapeNode, 'Appearance')
+            materialNode = et.SubElement(appearanceNode, 'Material')
+            materialNode.set('diffuseColor', "%f %f %f" % color)
 
     return shapeNode
 
